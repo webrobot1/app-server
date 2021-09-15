@@ -1,7 +1,7 @@
 <?php
 namespace Edisom\App\server\model\Protocols;
 
-class Udp
+class Udp implements \Workerman\Protocols\ProtocolInterface
 {
     /**
      * Check the integrity of the package.
