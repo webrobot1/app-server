@@ -71,7 +71,7 @@ class ServerModel extends \Edisom\Core\Model
 
 			static::log('открываем сервер на '.$address);	
 			$this->socket = new \Workerman\Worker($address);
-				$worker->socket->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
+				$this->socket->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
 			$this->socket->onWorkerStart = function($worker)
 			{	
 				// персональный протокол (для decode и encode сообщений)
