@@ -65,17 +65,17 @@ class ServerModel extends \Edisom\Core\Model
 		// а то все идет по пизде с проверко наличие фаилов Workerman в папке /tmp
 		// systemctl daemon-reload  и перезапускаем apache 
 		
-		if(static::config('protocol') && ($address = strtolower(static::config('protocol')).'//0.0.0.0:'.static::config('port')))
+		if(static::config('protocol') && ($address = strtolower(static::config('protocol')).'://0.0.0.0:'.static::config('port')))
 		{
 			\Workerman\Worker::$logFile = static::temp().'main.log';
 
 			static::log('открываем сервер на '.$address);	
-			$this->socket = new \Workerman\Worker('websocket//0.0.0.0:'.static::config('port'));
+			$this->socket = new \Workerman\Worker($address);
 			$this->socket->onWorkerStart = function($worker)
 			{	
 				// персональный протокол (для decode и encode сообщений)
 				// todo понадогбиться разделять Json пакеты друг от друга (придумать разделитель, типа \n)
-				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\Websocket";
+				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
 				static::log('Используемый протокол: '.$worker->protocol);
 				
 				//@unlink(static::temp().'main.log');
