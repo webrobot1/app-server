@@ -75,7 +75,7 @@ class ServerModel extends \Edisom\Core\Model
 			{	
 				// персональный протокол (для decode и encode сообщений)
 				// todo понадогбиться разделять Json пакеты друг от друга (придумать разделитель, типа \n)
-				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
+				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\Websocket";
 				static::log('Используемый протокол: '.$worker->protocol);
 				
 				//@unlink(static::temp().'main.log');
