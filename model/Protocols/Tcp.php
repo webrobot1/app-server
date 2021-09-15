@@ -1,7 +1,7 @@
 <?php
 namespace Edisom\App\server\model\Protocols;
 
-class Tcp implements \Workerman\Protocols\ProtocolInterface
+class Tcp
 {
     /**
      * Check the integrity of the package.
