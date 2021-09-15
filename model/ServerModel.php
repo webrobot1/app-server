@@ -70,7 +70,7 @@ class ServerModel extends \Edisom\Core\Model
 			\Workerman\Worker::$logFile = static::temp().'main.log';
 
 			static::log('открываем сервер на '.$address);	
-			$this->socket = new \Workerman\Worker('websocket://0.0.0.0:'.static::config('port'));
+			$this->socket = new \Workerman\Worker($address);
 			
 			// персональный протокол (для decode и encode сообщений)
 			// todo понадогбиться разделять Json пакеты друг от друга (придумать разделитель, типа \n)
