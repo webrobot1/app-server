@@ -22,7 +22,7 @@ class ServerModel extends \Edisom\Core\Model
 		try{
 			if($return = \Edisom\Core\Cli::cmd($cmd))
 			{
-				$this->socket->connections[$this->tokens[$data['token']]]->send($return.'⌂');
+				$this->socket->connections[$this->tokens[$data['token']]]->send($return."©");
 				static::log('Шлем в ответ: '.$return);	
 			}			
 		}
@@ -96,7 +96,7 @@ class ServerModel extends \Edisom\Core\Model
 						if(isset($this->socket->connections[$this->tokens[$token]]))
 						{	
 							static::log('Шлем '.$token.': '.$message);					
-							$this->socket->connections[$this->tokens[$token]]->send($message.'⌂');
+							$this->socket->connections[$this->tokens[$token]]->send($message."©");
 						}
 						else
 						{
