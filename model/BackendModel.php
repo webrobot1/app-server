@@ -21,6 +21,6 @@ class BackendModel extends \Edisom\Core\Model
 	function getLog(string $file = 'main.log')
     {    
         if($content = @file(static::temp().$file))
-            return implode("", array_reverse(array_splice($content, count($content)-50, 50)));
+            return implode("", array_splice($content, count($content)-50, 50));
     }    
 }

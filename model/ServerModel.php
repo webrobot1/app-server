@@ -67,13 +67,13 @@ class ServerModel extends \Edisom\Core\Model
 		
 		\Workerman\Worker::$logFile = static::temp().'main.log';
 
-		$this->socket = new \Workerman\Worker('websocket://0.0.0.0:'.static::config('port'));
+		$this->socket = new \Workerman\Worker(strtolower(static::config('protocol')).'//0.0.0.0:'.static::config('port'));
 		$this->socket->onWorkerStart = function($worker)
 		{	
 			// персональный протокол (для decode и encode сообщений)
 			// todo понадогбиться разделять Json пакеты друг от друга (придумать разделитель, типа \n)
 			if(static::config('protocol'))
-				$worker->protocol = static::config('protocol');
+				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
 			
 			//@unlink(static::temp().'main.log');
 			//@unlink(static::temp().'error.log');
