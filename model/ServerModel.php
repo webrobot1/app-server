@@ -22,7 +22,7 @@ class ServerModel extends \Edisom\Core\Model
 		try{
 			if($return = \Edisom\Core\Cli::cmd($cmd))
 			{
-				$this->socket->connections[$this->tokens[$data['token']]]->send($return);
+				$this->socket->connections[$this->tokens[$data['token']]]->send($return.'⌂');
 				static::log('Шлем в ответ: '.$return);	
 			}			
 		}
@@ -71,12 +71,11 @@ class ServerModel extends \Edisom\Core\Model
 
 			static::log('открываем сервер на '.$address);	
 			$this->socket = new \Workerman\Worker($address);
-				$this->socket->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
 			$this->socket->onWorkerStart = function($worker)
 			{	
 				// персональный протокол (для decode и encode сообщений)
 				// todo понадогбиться разделять Json пакеты друг от друга (придумать разделитель, типа \n)
-			
+				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
 				static::log('Используемый протокол: '.$worker->protocol);
 				
 				//@unlink(static::temp().'main.log');
@@ -97,7 +96,7 @@ class ServerModel extends \Edisom\Core\Model
 						if(isset($this->socket->connections[$this->tokens[$token]]))
 						{	
 							static::log('Шлем '.$token.': '.$message);					
-							$this->socket->connections[$this->tokens[$token]]->send($message);
+							$this->socket->connections[$this->tokens[$token]]->send($message.'⌂');
 						}
 						else
 						{
