@@ -35,7 +35,10 @@ class Tcp
      */
     public static function decode($buffer):array
     {	
-		return \rtrim($buffer, '||');
+		if($buffer = \rtrim($buffer, '||')){
+			Worker::safeEcho("Клиент говорит: ".$buffer);
+			return $buffer;
+		}
     }
 
     /**
@@ -48,6 +51,7 @@ class Tcp
     {
 		if($buffer = $buffer.'||')
 		{	
+			Worker::safeEcho("Шлем: ".$buffer);
 			return $buffer;
 		}
     }     
