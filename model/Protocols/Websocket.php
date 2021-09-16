@@ -1,9 +1,9 @@
 <?php
 namespace Edisom\App\server\model\Protocols;
+use Workerman\Worker;
 
 class Websocket extends \Workerman\Protocols\Websocket
-{
-	
+{	
 	public static function encode($buffer, ConnectionInterface $connection)
     {
 		Worker::log("Шлем: ".$buffer);
