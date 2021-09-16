@@ -27,7 +27,6 @@ class ServerModel extends \Edisom\Core\Model
 			if($return = \Edisom\Core\Cli::cmd($cmd))
 			{
 				$this->socket->connections[$this->tokens[$data['token']]]->send($return);
-				static::log('Шлем в ответ: '.$return);	
 			}			
 		}
 		catch(\Exception $e) {
@@ -98,8 +97,7 @@ class ServerModel extends \Edisom\Core\Model
 					{	
 						// если у нас есть соединение  
 						if(isset($this->socket->connections[$this->tokens[$token]]))
-						{	
-							static::log('Шлем '.$token.': '.$message);					
+						{				
 							$this->socket->connections[$this->tokens[$token]]->send($message);
 						}
 						else
@@ -166,7 +164,6 @@ class ServerModel extends \Edisom\Core\Model
 			{ 
 				foreach($messages as $data)
 				{
-					static::log('клиент сказал '.print_r($data, true));
 					// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
 					if((isset($data['token']) || ($data['token'] = array_search($connection->id, $this->tokens))) && static::redis()->hExists($data['token'], 'id'))
 					{								
