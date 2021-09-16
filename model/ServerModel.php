@@ -3,7 +3,7 @@ namespace Edisom\App\server\model;
 
 class ServerModel extends \Edisom\Core\Model
 {	
-	const PROTOCOL = "Tcp";
+	const PROTOCOL = "Websocket";
 	
 	private $socket;
 	private $tokens = array();
@@ -42,8 +42,7 @@ class ServerModel extends \Edisom\Core\Model
 		{	
 			static::log('отключаем '.$token);
 			static::log($message);
-			$connection->close($message);
-			
+			$connection->close($message);		
 			
 			if(static::PROTOCOL == 'Udp')
 			{
@@ -90,8 +89,8 @@ class ServerModel extends \Edisom\Core\Model
 				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::PROTOCOL;
 				static::log('Используемый протокол: '.$worker->protocol);
 				
-				//@unlink(static::temp().'main.log');
-				//@unlink(static::temp().'error.log');
+				@unlink(static::temp().'main.log');
+				@unlink(static::temp().'error.log');
 				
 				static::log("очищаем Redis");
 				static::redis()->flushAll();
