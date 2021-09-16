@@ -99,8 +99,10 @@ class ServerModel extends \Edisom\Core\Model
 				// если что то придет из других приложений (из Redis) - сообщим всем на карте
 				// todo пока тут одна карта но нужен массив из всех карт
 				$subscribe = new \Workerman\Redis\Client('redis://127.0.0.1:6379');
-				$subscribe->subscribe("map:2", function ($channel, $message) 
+				$subscribe->subscribe("map:2", function ($pattren, $channel, $message) 
 				{
+					static::log($pattren.'|'.$message.'|'.$channel);
+					
 					foreach(static::redis()->zRange($channel, 0, -1) as $token)
 					{	
 						// если у нас есть соединение  
