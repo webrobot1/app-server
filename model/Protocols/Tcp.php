@@ -38,7 +38,7 @@ class Tcp
     {	
 		if($buffer = \rtrim($buffer, '||')){
 			Worker::log("Клиент говорит: ".$buffer);
-			return $buffer;
+			return json_decode($buff, true);
 		}
     }
 
