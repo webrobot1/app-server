@@ -41,7 +41,13 @@ class ServerModel extends \Edisom\Core\Model
 			static::log('отключаем '.$token);
 			static::log($message);
 			$connection->close($message);
-			@unset($this->socket->connections[$this->tokens[$token]]);
+			
+			
+			if(static::PROTOCOL == 'Udp')
+			{
+				unset($this->socket->connections[$this->tokens[$token]]);
+				 \call_user_func($this->socket->onClose, $connection);
+			}
 		}	
 	}	
 	
@@ -164,10 +170,10 @@ class ServerModel extends \Edisom\Core\Model
 			$this->socket->onMessage = function($connection, array $data)
 			{ 
 				// udp
-				if(!$connection->id)
+				if(static::PROTOCOL == 'Udp')
 				{
 					$connection->id = $connection->getRemoteAddress();
-					$this->socket->connections[$connection->getRemoteAddress()] = $connection;
+					$this->socket->connections[$connection->id] = $connection;
 				}
 								
 				// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
