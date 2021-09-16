@@ -41,6 +41,7 @@ class ServerModel extends \Edisom\Core\Model
 			static::log('отключаем '.$token);
 			static::log($message);
 			$connection->close($message);
+			@unset($this->socket->connections[$this->tokens[$token]]);
 		}	
 	}	
 	
@@ -162,6 +163,13 @@ class ServerModel extends \Edisom\Core\Model
 			
 			$this->socket->onMessage = function($connection, array $data)
 			{ 
+				// udp
+				if(!$connection->id)
+				{
+					$connection->id = $connection->getRemoteAddress();
+					$this->socket->connections[$connection->getRemoteAddress()] = $connection;
+				}
+								
 				// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
 				if((isset($data['token']) || ($data['token'] = array_search($connection->id, $this->tokens))) && static::redis()->hExists($data['token'], 'id'))
 				{								
