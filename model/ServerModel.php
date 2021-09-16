@@ -29,8 +29,10 @@ class ServerModel extends \Edisom\Core\Model
 				$this->socket->connections[$this->tokens[$data['token']]]->send($return);
 			}			
 		}
-		catch(\Exception $e) {
-			$this->disconect($data['token'], $e->getMessage());	
+		catch(\Exception $ex) 
+		{
+			static::log($ex, 'error.log');
+			$this->disconect($data['token'], $ex->getMessage());	
 		}
 	}
 		
