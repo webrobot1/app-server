@@ -4,7 +4,7 @@ use Workerman\Worker;
 
 class Websocket extends \Workerman\Protocols\Websocket
 {	
-	public static function encode($buffer, ConnectionInterface $connection)
+	public static function encode($buffer, \Workerman\Connection\ConnectionInterface $connection)
     {
 		Worker::log("Шлем: ".$buffer);
 		return parent::encode($buffer, $connection);
