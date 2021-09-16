@@ -1,5 +1,6 @@
 <?php
 namespace Edisom\App\server\model\Protocols;
+use Workerman\Worker;
 
 class Udp extends Tcp
 {
