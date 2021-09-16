@@ -23,6 +23,7 @@ class Tcp
      */
     public static function decode($buffer)
     {
+		Edisom\Core\Model::log('клиент сказал '.$buffer);	
         return json_decode($buffer, true);
     }
 
@@ -34,7 +35,11 @@ class Tcp
      */
     public static function encode($buffer)
     {
-        return $buffer.'||';
+		if($buffer = $buffer.'||')
+		{
+			Edisom\Core\Model::log('Шлем: '.$buffer);	
+			return $buffer;
+		}
     }    
     
 }
