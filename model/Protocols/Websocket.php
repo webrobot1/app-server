@@ -9,7 +9,7 @@ class Websocket extends \Workerman\Protocols\Websocket
      * @param string $buffer
      * @return string
      */
-    public static function decode($buffer, \Workerman\Connection\ConnectionInterface $connection)
+    public static function decode($buffer, \Workerman\Connection\ConnectionInterface $connection):array
     {
 		return [json_decode(parent::decode($buffer, $connection), true)];
     }

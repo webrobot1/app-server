@@ -10,9 +10,21 @@ class Tcp
      * @param TcpConnection $connection
      * @return int
      */
-    public static function input($buffer, \Workerman\Connection\Connection $connection):int
+    public static function input($buffer, \Workerman\Connection\ConnectionInterface $connection):int
     {
-        return \strlen($buffer);
+        if (isset($connection->maxPackageSize) && \strlen($buffer) >= $connection->maxPackageSize) 
+		{
+			Worker::safeEcho("error package. package_length=".\strlen($buffer)."\n");
+            $connection->close();
+            return 0;
+        }
+		
+        $pos = \strpos($buffer, "||");
+        if ($pos === false) {
+            return 0;
+        }
+        // Return the current package length.
+        return $pos + 2;
     }
 
     /**
@@ -23,12 +35,7 @@ class Tcp
      */
     public static function decode($buffer):array
     {	
-		if($buffer = explode('||', $buffer))
-		{
-			foreach($buffer as &$buff)
-				$buff = json_decode($buff, true);	
-		}
-		return $buffer;
+		return \rtrim($buffer, '||');
     }
 
     /**
