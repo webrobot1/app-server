@@ -11,6 +11,6 @@ class Websocket extends \Workerman\Protocols\Websocket
      */
     public static function decode($buffer, \Workerman\Connection\ConnectionInterface $connection)
     {
-		return json_decode(parent::decode($buffer, $connection), true);
+		return [json_decode(parent::decode($buffer, $connection), true)];
     }
 }

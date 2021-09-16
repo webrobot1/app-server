@@ -10,7 +10,7 @@ class Tcp
      * @param TcpConnection $connection
      * @return int
      */
-    public static function input($buffer, \Workerman\Connection\TcpConnection $connection)
+    public static function input($buffer, \Workerman\Connection\Connection $connection):int
     {
         return \strlen($buffer);
     }
@@ -21,9 +21,14 @@ class Tcp
      * @param string $buffer
      * @return string
      */
-    public static function decode($buffer)
+    public static function decode($buffer):array
     {	
-        return json_decode($buffer, true);
+		if($buffer = explode('||', $buffer))
+		{
+			foreach($buffer as &$buff)
+				$buff = json_decode($buff, true);	
+		}
+		return $buffer;
     }
 
     /**
@@ -32,7 +37,7 @@ class Tcp
      * @param string $buffer
      * @return string
      */
-    public static function encode($buffer)
+    public static function encode($buffer):string
     {
 		if($buffer = $buffer.'||')
 		{	

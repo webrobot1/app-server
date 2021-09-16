@@ -3,7 +3,7 @@ namespace Edisom\App\server\model;
 
 class ServerModel extends \Edisom\Core\Model
 {	
-	const PROTOCOL = "Websocket";
+	const PROTOCOL = "Tcp";
 	
 	private $socket;
 	private $tokens = array();
@@ -15,6 +15,8 @@ class ServerModel extends \Edisom\Core\Model
 		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\ApiController', 'save', base64_encode(json_encode(['token'=>$token], JSON_NUMERIC_CHECK)), null, true));	
 	}
 	
+	
+	// нужно прийти к тому что бы ответ не ждать и рассылать в приложенях данные
 	private function run(string $controller, string $action, array $data)
 	{		
 		$cmd = \Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\'.ucfirst($controller)."Controller", $action, base64_encode(json_encode($data, JSON_NUMERIC_CHECK)));
@@ -160,37 +162,39 @@ class ServerModel extends \Edisom\Core\Model
 				$connection->close("error $code $msg");
 			};
 			
-			$this->socket->onMessage = function($connection, array $data)
+			$this->socket->onMessage = function($connection, array $messages)
 			{ 
-				static::log('клиент сказал '.print_r($data, true));
-			
-				// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
-				if((isset($data['token']) || ($data['token'] = array_search($connection->id, $this->tokens))) && static::redis()->hExists($data['token'], 'id'))
-				{								
-					// запишем кто сидит из под токеном что бы слать ответ
-					if(!array_key_exists($data['token'], $this->tokens))
-					{
-						$this->tokens[$data['token']] = $connection->id;
-						static::redis()->hSet($data['token'], 'ip' , $connection->getRemoteAddress());
+				foreach($messages as $data)
+				{
+					static::log('клиент сказал '.print_r($data, true));
+					// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
+					if((isset($data['token']) || ($data['token'] = array_search($connection->id, $this->tokens))) && static::redis()->hExists($data['token'], 'id'))
+					{								
+						// запишем кто сидит из под токеном что бы слать ответ
+						if(!array_key_exists($data['token'], $this->tokens))
+						{
+							$this->tokens[$data['token']] = $connection->id;
+							static::redis()->hSet($data['token'], 'ip' , $connection->getRemoteAddress());
+						}
+							
+						// обновим в редисе данные статические	
+						static::redis()->hSet($data['token'], 'datetime' , date("Y-m-d H:i:s"));
+						if(isset($data['pingTime']))
+							static::redis()->hSet($data['token'], 'ping' , $data['pingTime']);
+							
+						// можно еще в $data['action'] слать первым парметром приложение (ну пока только game используем)
+						// можно переделать на HTTP (типа Rabbit) , тогда вызываем метод по адресной строке вида (последняя часть - GET параметры распарсенные из массива):
+						// /game/$controller/$action/?static::explode($data, '&', false) 
+						list($controller, $action) = array_replace_recursive(array('api', 'index'), array_filter(explode('/', $data['action'])));
+							
+						static::redis()->hSet($data['token'], 'action', $data['action']);	
+						unset($data['action']);
+						
+						$this->run($controller, $action, $data);					
 					}
-						
-					// обновим в редисе данные статические	
-					static::redis()->hSet($data['token'], 'datetime' , date("Y-m-d H:i:s"));
-					if(isset($data['pingTime']))
-						static::redis()->hSet($data['token'], 'ping' , $data['pingTime']);
-						
-					// можно еще в $data['action'] слать первым парметром приложение (ну пока только game используем)
-					// можно переделать на HTTP (типа Rabbit) , тогда вызываем метод по адресной строке вида (последняя часть - GET параметры распарсенные из массива):
-					// /game/$controller/$action/?static::explode($data, '&', false) 
-					list($controller, $action) = array_replace_recursive(array('api', 'index'), array_filter(explode('/', $data['action'])));
-						
-					static::redis()->hSet($data['token'], 'action', $data['action']);	
-					unset($data['action']);
-					
-					$this->run($controller, $action, $data);					
-				}
-				else{
-					$connection->close('токен не найден');
+					else{
+						$connection->close('токен не найден');
+					}
 				}
 			};
 
