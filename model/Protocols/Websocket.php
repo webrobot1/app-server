@@ -6,11 +6,8 @@ class Websocket extends \Workerman\Protocols\Websocket
 {	
 	public static function encode($buffer, \Workerman\Connection\ConnectionInterface $connection)
     {
-		if($buffer = parent::encode($buffer, $connection))
-		{
-			Worker::log("Шлем: ".$buffer);
-			return $buffer;
-		}
+		Worker::log("Шлем: ".$buffer);
+		return parent::encode($buffer, $connection);
 	}
 	
     public static function decode($buffer, \Workerman\Connection\ConnectionInterface $connection):array
