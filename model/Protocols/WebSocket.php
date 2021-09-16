@@ -1,7 +1,7 @@
 <?php
 namespace Edisom\App\server\model\Protocols;
 
-class WebSocket extends \Workerman\Protocols\WebSocket
+class Websocket extends \Workerman\Protocols\WebSocket
 {
     /**
      * Decode.

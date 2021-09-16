@@ -3,6 +3,9 @@ namespace Edisom\App\server\model;
 
 class ServerModel extends \Edisom\Core\Model
 {	
+	const PROTOCOL = "Tcp";
+	
+	
 	private $socket;
 	private $tokens = array();
 	public static $pingPause = 20;
@@ -22,7 +25,7 @@ class ServerModel extends \Edisom\Core\Model
 		try{
 			if($return = \Edisom\Core\Cli::cmd($cmd))
 			{
-				$this->socket->connections[$this->tokens[$data['token']]]->send($return."©");
+				$this->socket->connections[$this->tokens[$data['token']]]->send($return);
 				static::log('Шлем в ответ: '.$return);	
 			}			
 		}
@@ -65,7 +68,7 @@ class ServerModel extends \Edisom\Core\Model
 		// а то все идет по пизде с проверко наличие фаилов Workerman в папке /tmp
 		// systemctl daemon-reload  и перезапускаем apache 
 		
-		if(static::config('protocol') && ($address = strtolower(static::config('protocol')).'://0.0.0.0:'.static::config('port')))
+		if(static::PROTOCOL && ($address = strtolower(static::PROTOCOL).'://0.0.0.0:'.static::config('port')))
 		{
 			\Workerman\Worker::$logFile = static::temp().'main.log';
 
@@ -75,7 +78,7 @@ class ServerModel extends \Edisom\Core\Model
 			{	
 				// персональный протокол (для decode и encode сообщений)
 				// todo понадогбиться разделять Json пакеты друг от друга (придумать разделитель, типа \n)
-				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::config('protocol');
+				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::PROTOCOL;
 				static::log('Используемый протокол: '.$worker->protocol);
 				
 				//@unlink(static::temp().'main.log');
@@ -96,7 +99,7 @@ class ServerModel extends \Edisom\Core\Model
 						if(isset($this->socket->connections[$this->tokens[$token]]))
 						{	
 							static::log('Шлем '.$token.': '.$message);					
-							$this->socket->connections[$this->tokens[$token]]->send($message."©");
+							$this->socket->connections[$this->tokens[$token]]->send($message);
 						}
 						else
 						{

@@ -34,7 +34,7 @@ class Tcp
      */
     public static function encode($buffer)
     {
-        return $buffer;
+        return $buffer.'||';
     }    
     
 }
