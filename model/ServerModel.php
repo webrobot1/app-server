@@ -5,6 +5,7 @@ class ServerModel extends \Edisom\Core\Model
 {	
 	const PROTOCOL = "Tcp";
 	
+	
 	private $socket;
 	private $tokens = array();
 	public static $pingPause = 20;
@@ -25,6 +26,7 @@ class ServerModel extends \Edisom\Core\Model
 			if($return = \Edisom\Core\Cli::cmd($cmd))
 			{
 				$this->socket->connections[$this->tokens[$data['token']]]->send($return);
+				static::log('Шлем в ответ: '.$return);	
 			}			
 		}
 		catch(\Exception $e) {
@@ -95,7 +97,8 @@ class ServerModel extends \Edisom\Core\Model
 					{	
 						// если у нас есть соединение  
 						if(isset($this->socket->connections[$this->tokens[$token]]))
-						{					
+						{	
+							static::log('Шлем '.$token.': '.$message);					
 							$this->socket->connections[$this->tokens[$token]]->send($message);
 						}
 						else
@@ -120,8 +123,7 @@ class ServerModel extends \Edisom\Core\Model
 						}
 						else
 						{
-							if($time >= time()-static::$pingPause)
-							{
+							if($time >= time()-static::$pingPause){
 								static::log("запрос скриншета");	
 								$this->socket->connections[$id]->send(json_encode(['action'=>'screen']));
 							}
@@ -160,7 +162,9 @@ class ServerModel extends \Edisom\Core\Model
 			};
 			
 			$this->socket->onMessage = function($connection, array $data)
-			{ 	
+			{ 
+				static::log('клиент сказал '.print_r($data, true));
+			
 				// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
 				if((isset($data['token']) || ($data['token'] = array_search($connection->id, $this->tokens))) && static::redis()->hExists($data['token'], 'id'))
 				{								
