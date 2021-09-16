@@ -31,7 +31,7 @@ class ServerModel extends \Edisom\Core\Model
 		}
 		catch(\Exception $ex) 
 		{
-			static::log($ex, 'error.log');
+			static::log($ex, 'main.log');
 			$this->disconect($data['token'], $ex->getMessage());	
 		}
 	}
