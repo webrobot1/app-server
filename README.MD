@@ -1,4 +1,4 @@
-![Preview](/webrobot1/app-server/raw/master/theme/default/backend/img/preview.png)
+![Preview](webrobot1/app-server/raw/master/theme/default/backend/img/preview.png)
 
 Сервер для взаимодействия клиент серверны Онлайн игр. Работает как демон, выступает в виде роутера принимающий соединения при наличии токена (токен геренируется и првоеряется в приложении [Онлайн игры - Управление Миром](https://github.com/webrobot1/app-game) ).    
     
