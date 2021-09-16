@@ -101,8 +101,6 @@ class ServerModel extends \Edisom\Core\Model
 				$subscribe = new \Workerman\Redis\Client('redis://127.0.0.1:6379');
 				$subscribe->pSubscribe("map:?", function ($pattren, $channel, $message) 
 				{
-					static::log($pattren.'|'.$channel.'|'.$message);
-					
 					foreach(static::redis()->zRange($channel, 0, -1) as $token)
 					{	
 						// если у нас есть соединение  
