@@ -14,7 +14,7 @@ class Tcp
     {
         if (isset($connection->maxPackageSize) && \strlen($buffer) >= $connection->maxPackageSize) 
 		{
-			Worker::safeEcho("error package. package_length=".\strlen($buffer)."\n");
+			Worker::log("error package. package_length=".\strlen($buffer)."\n");
             $connection->close();
             return 0;
         }
@@ -36,7 +36,7 @@ class Tcp
     public static function decode($buffer):array
     {	
 		if($buffer = \rtrim($buffer, '||')){
-			Worker::safeEcho("Клиент говорит: ".$buffer);
+			Worker::log("Клиент говорит: ".$buffer);
 			return $buffer;
 		}
     }
@@ -51,7 +51,7 @@ class Tcp
     {
 		if($buffer = $buffer.'||')
 		{	
-			Worker::safeEcho("Шлем: ".$buffer);
+			Worker::log("Шлем: ".$buffer);
 			return $buffer;
 		}
     }     
