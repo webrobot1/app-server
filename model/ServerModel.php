@@ -3,7 +3,7 @@ namespace Edisom\App\server\model;
 
 class ServerModel extends \Edisom\Core\Model
 {	
-	const PROTOCOL = "Tcp";
+	const PROTOCOL = "Websocket";
 	
 	private $socket;
 	private $tokens = array();
@@ -161,6 +161,8 @@ class ServerModel extends \Edisom\Core\Model
 					$this->save($token);
 					$this->remove($token);
 				}
+				else
+					static::log("не найден токен закрытого соединения");	
 			};
 			
 			$this->socket->onError = function($connection, $code, $msg)
