@@ -3,7 +3,7 @@ namespace Edisom\App\server\model;
 
 class ServerModel extends \Edisom\Core\Model
 {	
-	const PROTOCOL = "Tcp";
+	const PROTOCOL = "Udp";
 	
 	private $socket;
 	private $tokens = array();
