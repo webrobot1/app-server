@@ -89,8 +89,8 @@ class ServerModel extends \Edisom\Core\Model
 				$worker->protocol = "\\Edisom\\App\\server\\model\\Protocols\\".static::PROTOCOL;
 				static::log('Используемый протокол: '.$worker->protocol);
 				
-				@unlink(static::temp().'main.log');
-				@unlink(static::temp().'error.log');
+				//@unlink(static::temp().'main.log');
+				//@unlink(static::temp().'error.log');
 				
 				static::log("очищаем Redis");
 				static::redis()->flushAll();
