@@ -198,8 +198,6 @@ class ServerModel extends \Edisom\Core\Model
 					// можно переделать на HTTP (типа Rabbit) , тогда вызываем метод по адресной строке вида (последняя часть - GET параметры распарсенные из массива):
 					// /game/$controller/$action/?static::explode($data, '&', false) 
 					list($controller, $action) = array_replace_recursive(array('api', 'index'), array_filter(explode('/', $data['action'])));
-						
-					static::redis()->hSet($data['token'], 'action', $data['action']);	
 					unset($data['action']);
 					
 					$this->run($controller, $action, $data);					
