@@ -38,8 +38,7 @@ class BackendController extends \Edisom\Core\Backend
 		$this->model->stop();
 		$this->redirect();
 	}	
-	
-	
+		
 	function restart()
 	{		
 		$this->model->restart();
