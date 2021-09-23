@@ -130,10 +130,10 @@ class ServerModel extends \Edisom\Core\Model
 						}
 						else
 						{
-							if($time >= time()-static::$pingPause){
-								static::log("запрос скриншета");	
-								$this->socket->connections[$id]->send(json_encode(['action'=>'screen']));
-							}
+							//if($time >= time()-static::$pingPause){
+							//	static::log("запрос скриншета");	
+							//	$this->socket->connections[$id]->send(json_encode(['action'=>'screen']));
+							//}
 							
 							$this->save($token);
 						}
