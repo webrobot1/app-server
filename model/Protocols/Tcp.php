@@ -1,6 +1,6 @@
 <?php
 namespace Edisom\App\server\model\Protocols;
-use Workerman\Worker;
+use Edisom\App\server\model\ServerModel;
 
 class Tcp
 {
@@ -15,7 +15,7 @@ class Tcp
     {
         if (isset($connection->maxPackageSize) && \strlen($buffer) >= $connection->maxPackageSize) 
 		{
-			Worker::log("error package. package_length=".\strlen($buffer)."\n");
+			ServerModel::log("error package. package_length=".\strlen($buffer)."\n");
             $connection->close();
             return 0;
         }
@@ -37,7 +37,7 @@ class Tcp
     public static function decode($buffer):array
     {	
 		if($buffer = \rtrim($buffer, '||')){
-			Worker::log("Клиент говорит: ".$buffer);
+			ServerModel::log("Клиент говорит: ".$buffer);
 			return json_decode($buffer, true);
 		}
     }
