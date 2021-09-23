@@ -19,7 +19,7 @@ class ServerModel extends \Edisom\Core\Model
 	// нужно прийти к тому что бы ответ не ждать и рассылать в приложенях данные
 	private function run(string $controller, string $action, array $data)
 	{		
-		$cmd = \Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\'.ucfirst($controller)."Controller", $action, base64_encode(json_encode($data, JSON_NUMERIC_CHECK)));
+		$cmd = \Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\'.ucfirst($controller)."Controller", $action, base64_encode(json_encode($data, JSON_NUMERIC_CHECK)), null, true);
 		
 		static::log('вызываем '.$cmd);
 		
