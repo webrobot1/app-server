@@ -34,6 +34,8 @@ class ServerModel extends \Edisom\Core\Model
 			static::log($ex, 'main.log');
 			$this->disconect($data['token'], $ex->getMessage());	
 		}
+		
+		static::log('выходим из вызова');
 	}
 		
 	private function disconect(string $token, string $message)
