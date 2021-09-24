@@ -28,10 +28,7 @@ class ServerModel extends \Edisom\Core\Model
 	{		
 		if($connection = $this->socket->connections[$this->tokens[$token]])
 		{	
-			static::log('отключаем '.$token);
-			static::log($message);
-			$connection->close($message);		
-			
+			$connection->close(json_encode(['error'=>$message]));		
 			if(static::PROTOCOL == 'Udp')
 			{
 				unset($this->socket->connections[$this->tokens[$token]]);
