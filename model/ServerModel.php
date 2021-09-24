@@ -21,6 +21,8 @@ class ServerModel extends \Edisom\Core\Model
 	{	
 		// только тихий режитм, не блокируем этот процесс
 		$cmd = Cli::get('\\Edisom\\App\\game\\model\\api\\'.ucfirst($controller)."Model", $action, Cli::encode($data), null, true);	
+		Cli::cmd($cmd);
+		
 		static::log('вызываем '.$cmd);
 	}
 		
