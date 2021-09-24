@@ -112,7 +112,7 @@ class ServerModel extends \Edisom\Core\Model
 				$subscribe->pSubscribe("token:?", function ($pattren, $channel, $message) 
 				{
 					$token = substr($channel, 6);
-					
+					static::log('отправка для '.$token);
 					if(isset($this->socket->connections[$this->tokens[$token]]))
 					{				
 						$this->socket->connections[$this->tokens[$token]]->send($message);
