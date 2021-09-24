@@ -97,14 +97,14 @@ class ServerModel extends \Edisom\Core\Model
 					switch($key)
 					{
 						case 'map':
-							$tokens = static::redis()->zRange($id, 0, -1);
+							$tokens = static::redis()->zRange($chanel, 0, -1);
 						break;
 						case 'token':
 							$tokens[] = $id;
 						break;
 					}
 					
-					static::log('Пришли данные на канал '.$chanel.': '.$message);
+					static::log('Пришли данные на канал '.$key.':'.$id.' '.$message);
 					
 					foreach($tokens as $token)
 					{	
