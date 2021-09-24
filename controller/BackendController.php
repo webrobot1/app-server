@@ -5,7 +5,7 @@ class BackendController extends \Edisom\Core\Backend
 {	
 	function index()
 	{		
-		$this->view->assign('cron', \Edisom\Core\Cli::get('\\Edisom\\App\\server\\model\\ServerModel', 'synch', ["start"], 'server/main.log'));
+		$this->view->assign('cron', \Edisom\Core\Cli::get('\\Edisom\\App\\server\\model\\ServerModel', 'synch', ['command'=>"start"], 'server/main.log'));
 		$this->view->assign('status', $this->model->status());
 		$this->view->display('main.html');
 	}	
