@@ -1,5 +1,6 @@
 <?php
 namespace Edisom\App\server\model;
+use \Edisom\Core\Cli;
 
 class ServerModel extends \Edisom\Core\Model
 {	
@@ -12,14 +13,14 @@ class ServerModel extends \Edisom\Core\Model
 	private function save(string $token)
 	{
 		// сохранение в тихом режиме (ответа не ждем)
-		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\game\\model\\api\\ApiModel', 'save', ['token'=>$token], null, true));	
+		\Edisom\Core\Cli::cmd(Cli::get('\\Edisom\\App\\game\\model\\api\\ApiModel', 'save', Cli::encode(['token'=>$token]), null, true));	
 	}
 		
 	// нужно прийти к тому что бы ответ не ждать и рассылать в приложенях данные
 	private function run(string $controller, string $action, array $data)
 	{	
 		// только тихий режитм, не блокируем этот процесс
-		$cmd = \Edisom\Core\Cli::get('\\Edisom\\App\\game\\model\\api\\'.ucfirst($controller)."Model", $action, $data, null, true);	
+		$cmd = Cli::get('\\Edisom\\App\\game\\model\\api\\'.ucfirst($controller)."Model", $action, Cli::encode($data), null, true);	
 		static::log('вызываем '.$cmd);
 	}
 		
