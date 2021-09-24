@@ -104,6 +104,8 @@ class ServerModel extends \Edisom\Core\Model
 						break;
 					}
 					
+					static::log('Пришли данные на канал '.$chanel.': '.$message);
+					
 					foreach($tokens as $token)
 					{	
 						// если у нас есть соединение  
