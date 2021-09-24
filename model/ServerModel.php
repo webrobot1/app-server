@@ -14,28 +14,14 @@ class ServerModel extends \Edisom\Core\Model
 		// сохранение в тихом режиме (ответа не ждем)
 		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\ApiController', 'save', base64_encode(json_encode(['token'=>$token], JSON_NUMERIC_CHECK)), null, true));	
 	}
-	
-	
+		
 	// нужно прийти к тому что бы ответ не ждать и рассылать в приложенях данные
 	private function run(string $controller, string $action, array $data)
-	{		
+	{	
+		// только тихий режитм, не блокируем этот процесс
 		$cmd = \Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\'.ucfirst($controller)."Controller", $action, base64_encode(json_encode($data, JSON_NUMERIC_CHECK)), null, true);
 		
 		static::log('вызываем '.$cmd);
-		
-		try{
-			if($return = \Edisom\Core\Cli::cmd($cmd))
-			{
-				$this->socket->connections[$this->tokens[$data['token']]]->send($return);
-			}			
-		}
-		catch(\Exception $ex) 
-		{
-			static::log($ex, 'main.log');
-			$this->disconect($data['token'], $ex->getMessage());	
-		}
-		
-		static::log('выходим из вызова');
 	}
 		
 	private function disconect(string $token, string $message)
@@ -101,9 +87,9 @@ class ServerModel extends \Edisom\Core\Model
 				// если что то придет из других приложений (из Redis) - сообщим всем на карте
 				// todo пока тут одна карта но нужен массив из всех карт
 				$subscribe = new \Workerman\Redis\Client('redis://127.0.0.1:6379');
-				$subscribe->pSubscribe("map:?", function ($pattren, $channel, $message) 
+				$subscribe->pSubscribe("map:?", function ($pattren, $map, $message) 
 				{
-					foreach(static::redis()->zRange($channel, 0, -1) as $token)
+					foreach(static::redis()->zRange($map, 0, -1) as $token)
 					{	
 						// если у нас есть соединение  
 						if(isset($this->socket->connections[$this->tokens[$token]]))
@@ -116,6 +102,22 @@ class ServerModel extends \Edisom\Core\Model
 							static::log('Пользователь '.$token.' не найден');	
 							$this->remove($token);
 						}
+					}
+				});
+				
+				$subscribe->pSubscribe("token:?", function ($pattren, $channel, $message) 
+				{
+					$token = substr($channel, 6);
+					
+					if(isset($this->socket->connections[$this->tokens[$token]]))
+					{				
+						$this->socket->connections[$this->tokens[$token]]->send($message);
+					}
+					else
+					{
+						// если нет - удалим из редиса данные токена
+						static::log('Пользователь '.$token.' не найден');	
+						$this->remove($token);
 					}
 				});
 				
