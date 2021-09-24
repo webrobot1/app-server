@@ -50,19 +50,26 @@ class ServerModel extends \Edisom\Core\Model
 		//todo удаляем с карты		
 	}
 	
-	function command()
+	function stop()
 	{
 		if (\PHP_SAPI !== 'cli') {
             exit("Only run in command line mode \n");
         }	
 		global $argv;
 		
-		$argv[2] = $argv[2][0];
-		
+		\Workerman\Worker::runAll();
+   }		
+   
+   function status()
+	{
+		if (\PHP_SAPI !== 'cli') {
+            exit("Only run in command line mode \n");
+        }	
+
 		\Workerman\Worker::runAll();
    }	
 				
-	function synch()
+	function start()
 	{
 		if (\PHP_SAPI !== 'cli') {
             exit("Only run in command line mode \n");
