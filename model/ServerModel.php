@@ -52,8 +52,11 @@ class ServerModel extends \Edisom\Core\Model
 	
 	function command()
 	{
-
-    }	
+		if (\PHP_SAPI !== 'cli') {
+            exit("Only run in command line mode \n");
+        }	
+		\Workerman\Worker::runAll();
+   }	
 				
 	function synch()
 	{
