@@ -91,9 +91,20 @@ class ServerModel extends \Edisom\Core\Model
 				// если что то придет из других приложений (из Redis) - сообщим всем на карте
 				// todo пока тут одна карта но нужен массив из всех карт
 				$subscribe = new \Workerman\Redis\Client('redis://127.0.0.1:6379');
-				$subscribe->pSubscribe("map:?", function ($pattren, $map, $message) 
+				$subscribe->pSubscribe(["map:?", "token:?"], function ($pattren, $chanel, $message) 
 				{
-					foreach(static::redis()->zRange($map, 0, -1) as $token)
+					list($key, $id) = explode(':', $chanel);
+					switch($key)
+					{
+						case 'map':
+							$tokens = static::redis()->zRange($id, 0, -1);
+						break;
+						case 'token':
+							$tokens[] = $id;
+						break;
+					}
+					
+					foreach($tokens as $token)
 					{	
 						// если у нас есть соединение  
 						if(isset($this->socket->connections[$this->tokens[$token]]))
@@ -106,22 +117,6 @@ class ServerModel extends \Edisom\Core\Model
 							static::log('Пользователь '.$token.' не найден');	
 							$this->remove($token);
 						}
-					}
-				});
-				
-				$subscribe->pSubscribe("token:?", function ($pattren, $channel, $message) 
-				{
-					$token = substr($channel, 6);
-					static::log('отправка для '.$token);
-					if(isset($this->socket->connections[$this->tokens[$token]]))
-					{				
-						$this->socket->connections[$this->tokens[$token]]->send($message);
-					}
-					else
-					{
-						// если нет - удалим из редиса данные токена
-						static::log('Пользователь '.$token.' не найден');	
-						$this->remove($token);
 					}
 				});
 				
