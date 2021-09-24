@@ -91,7 +91,7 @@ class ServerModel extends \Edisom\Core\Model
 				// если что то придет из других приложений (из Redis) - сообщим всем на карте
 				// todo пока тут одна карта но нужен массив из всех карт
 				$subscribe = new \Workerman\Redis\Client('redis://127.0.0.1:6379');
-				$subscribe->pSubscribe(["map:?", "token:?"], function ($pattren, $chanel, $message) 
+				$subscribe->pSubscribe(["token:*", "map:*"], function ($pattren, $chanel, $message) 
 				{
 					list($key, $id) = explode(':', $chanel);
 					switch($key)
