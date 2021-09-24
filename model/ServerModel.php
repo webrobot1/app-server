@@ -55,6 +55,9 @@ class ServerModel extends \Edisom\Core\Model
 		if (\PHP_SAPI !== 'cli') {
             exit("Only run in command line mode \n");
         }	
+		
+		$argv[2] = $argv[2][0];
+		
 		\Workerman\Worker::runAll();
    }	
 				
