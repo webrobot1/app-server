@@ -12,15 +12,14 @@ class ServerModel extends \Edisom\Core\Model
 	private function save(string $token)
 	{
 		// сохранение в тихом режиме (ответа не ждем)
-		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\ApiController', 'save', base64_encode(json_encode(['token'=>$token], JSON_NUMERIC_CHECK)), null, true));	
+		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\game\\model\\api\\ApiModel', 'save', ['token'=>$token], null, true));	
 	}
 		
 	// нужно прийти к тому что бы ответ не ждать и рассылать в приложенях данные
 	private function run(string $controller, string $action, array $data)
 	{	
 		// только тихий режитм, не блокируем этот процесс
-		$cmd = \Edisom\Core\Cli::get('\\Edisom\\App\\game\\controller\\'.ucfirst($controller)."Controller", $action, base64_encode(json_encode($data, JSON_NUMERIC_CHECK)), null, true);
-		
+		$cmd = \Edisom\Core\Cli::get('\\Edisom\\App\\game\\model\\api\\'.ucfirst($controller)."Model", $action, $data, null, true);	
 		static::log('вызываем '.$cmd);
 	}
 		
@@ -51,6 +50,14 @@ class ServerModel extends \Edisom\Core\Model
 		//todo удаляем с карты		
 	}
 	
+	function command()
+	{
+		if (\PHP_SAPI !== 'cli') {
+            exit("Only run in command line mode \n");
+        }	
+		\Workerman\Worker::runAll();
+   }	
+				
 	function synch()
 	{
 		if (\PHP_SAPI !== 'cli') {

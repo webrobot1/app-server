@@ -4,14 +4,14 @@ class BackendModel extends \Edisom\Core\Model
 {	
 	function status(){
 		return [
-			'workerman'=>\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\server\\model\\ServerModel', 'synch', "status")),
+			'workerman'=>\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\server\\model\\ServerModel', 'command', ["status"])),
 			'redis'=>static::explode(static::redis()->info('memory'), "<br/>", false),
 			'supervisor'=>\Edisom\Core\Cli::cmd('service supervisor status'),
 		];
 	}	
 	   			
 	function stop(){
-		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\server\\model\\ServerModel', 'synch', "stop"));	
+		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\server\\model\\ServerModel', 'command', ["stop"]));	
 	}		
 	
 	function restart(){
