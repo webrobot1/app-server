@@ -1,6 +1,5 @@
 <?php
 namespace Edisom\App\server\model;
-use \Edisom\Core\Cli;
 
 class ServerModel extends \Edisom\Core\Model
 {	
@@ -13,19 +12,33 @@ class ServerModel extends \Edisom\Core\Model
 	private function save(string $token)
 	{
 		// сохранение в тихом режиме (ответа не ждем)
-		\Edisom\Core\Cli::cmd(Cli::get('\\Edisom\\App\\game\\model\\api\\ApiModel', 'save', Cli::encode(['token'=>$token]), null, true));	
+		$this->run('api', 'save', $token);	
 	}
 		
 	// нужно прийти к тому что бы ответ не ждать и рассылать в приложенях данные
-	private function run(string $controller, string $action, array $data)
+	private function run(string $model, string $action, string $token, array $data = null)
 	{	
-		// только тихий режитм, не блокируем этот процесс
-		$cmd = Cli::get('\\Edisom\\App\\game\\model\\api\\'.ucfirst($controller)."Model", $action, Cli::encode($data), null, true);	
-		Cli::cmd($cmd);
-		
-		static::log('вызываем '.$cmd);
+		if($model = '\\Edisom\\App\\game\\model\\api\\'.ucfirst(strtolower($model))."Model")
+		{
+			// модель загружается в отдельном ветки процесса и уничтожается (те все модели Api можно обновлять без перезагрузки сервера и рабоатет все асинхронно)
+			$pid = pcntl_fork();
+			if ($pid == -1) 
+				 throw new \Exception('Не удалось породить дочерний процесс');
+			 
+			if ($pid) // Код родительского процесса
+			{
+				pcntl_wait($status, WNOHANG);
+				static::log('вызываем '.$model.' в ветке '.$pid);
+			} 
+			else 
+			{
+				$model::getInstance($token)->$action();
+				exit();
+			}	
+		}
 	}
-		
+	
+	// метод нужен только для протокола Udp  тк у него нет обработчика onClose
 	private function disconect(string $token, string $message)
 	{		
 		if($connection = $this->socket->connections[$this->tokens[$token]])
@@ -40,13 +53,14 @@ class ServerModel extends \Edisom\Core\Model
 	}	
 	
 	private function remove($token)
-	{
+	{	
+		// удаляем последние записи о пользователе
+		$this->save($token);
+		
 		// удаляем геокоординаты
 		static::redis()->zRem('map:'.static::redis()->hGet($token, 'map_id'), $token);
-		// удаляем последние записи о пользователе
 		static::redis()->del($token);
-		
-		
+			
 		// удаляем его из конекта
 		unset($this->tokens[$token]);
 		
@@ -104,7 +118,7 @@ class ServerModel extends \Edisom\Core\Model
 						break;
 					}
 					
-					static::log('Пришли данные на канал '.$key.':'.$id.' '.$message);
+					static::log('Пришли данные на канал '.$key.':'.$id);
 					
 					foreach($tokens as $token)
 					{	
@@ -148,6 +162,7 @@ class ServerModel extends \Edisom\Core\Model
 					
 			$this->socket->onWorkerStop = function($worker)
 			{	
+				static::log('сервер остановлен');
 				foreach (array_keys($this->tokens) as $token) 
 					$this->disconect($token, 'сервер остановлен');		
 			};	
@@ -155,15 +170,12 @@ class ServerModel extends \Edisom\Core\Model
 			$this->socket->onClose = function($connection)
 			{
 				if($token = array_search($connection->id, $this->tokens))
-				{
-					
+				{				
 					// обнулим параметры (они обнулятся при сохранении игрока в БД)
 					static::redis()->hSet($token, 'ip', '');
 					static::redis()->hSet($token, 'token', '');
 					static::redis()->hSet($token, 'action', 'offline');
 					
-					
-					$this->save($token);
 					$this->remove($token);
 				}
 				else
@@ -172,7 +184,7 @@ class ServerModel extends \Edisom\Core\Model
 			
 			$this->socket->onError = function($connection, $code, $msg)
 			{
-				$connection->close("error $code $msg");
+				$connection->close(json_encode(['error'=>"error $code $msg"]));
 			};
 			
 			$this->socket->onMessage = function($connection, array $data)
@@ -183,34 +195,42 @@ class ServerModel extends \Edisom\Core\Model
 					$connection->id = $connection->getRemoteAddress();
 					$this->socket->connections[$connection->id] = $connection;
 				}
-								
-				// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
-				if((isset($data['token']) || ($data['token'] = array_search($connection->id, $this->tokens))) && static::redis()->hExists($data['token'], 'id'))
-				{								
-					// запишем кто сидит из под токеном что бы слать ответ
-					if(!array_key_exists($data['token'], $this->tokens))
-					{
-						$this->tokens[$data['token']] = $connection->id;
-						static::redis()->hSet($data['token'], 'ip' , $connection->getRemoteAddress());
-					}
-						
-					// обновим в редисе данные статические	
-					static::redis()->hSet($data['token'], 'datetime' , date("Y-m-d H:i:s"));
-					if(isset($data['pingTime']))
-						static::redis()->hSet($data['token'], 'ping' , $data['pingTime']);
-						
-					// можно еще в $data['action'] слать первым парметром приложение (ну пока только game используем)
-					// можно переделать на HTTP (типа Rabbit) , тогда вызываем метод по адресной строке вида (последняя часть - GET параметры распарсенные из массива):
-					// /game/$controller/$action/?static::explode($data, '&', false) 
-					list($controller, $action) = array_replace_recursive(array('api', 'index'), array_filter(explode('/', $data['action'])));
-						
-					static::redis()->hSet($data['token'], 'action', $data['action']);	
-					unset($data['action']);
+				
+				if((!$token = array_search($connection->id, $this->tokens)) && isset($data['token']) && static::redis()->hExists($data['token'], 'id'))
+				{
+					$token = $data['token'];
 					
-					$this->run($controller, $action, $data);					
+					// запишем кто сидит из под токеном что бы слать ответ
+					$this->tokens[$token] = $connection->id;
+					static::redis()->hSet($token, 'ip' , $connection->getRemoteAddress());	
+				}
+				
+				
+				// токен передаем только в первом сообщении (дальше его из переменной $this->tokens берем по установленному соединению)
+				if($token)
+				{
+					if($data['action'])
+					{
+						// обновим в редисе данные статические	
+						static::redis()->hSet($token, 'datetime' , date("Y-m-d H:i:s"));
+						if(isset($data['pingTime']))
+							static::redis()->hSet($token, 'ping' , $data['pingTime']);
+							
+						// можно еще в $data['action'] слать первым парметром приложение (ну пока только game используем)
+						// можно переделать на HTTP (типа Rabbit) , тогда вызываем метод по адресной строке вида (последняя часть - GET параметры распарсенные из массива):
+						// /game/$model/$action/?static::explode($data, '&', false) 
+						list($model, $action) = array_replace_recursive(array('api', 'index'), array_filter(explode('/', $data['action'])));
+							
+						static::redis()->hSet($token, 'action', $data['action']);	
+						unset($data['action']);
+						
+						$this->run($model, $action, $token, $data);
+					}
+					else
+						$connection->close(json_encode(['error'=>'не указан action']));	
 				}
 				else{
-					$connection->close('токен не найден');
+					$connection->close(json_encode(['error'=>'токен не найден']));
 				}
 			};
 
