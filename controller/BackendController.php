@@ -18,7 +18,7 @@ class BackendController extends \Edisom\Core\Backend
 	
 	function redis()
 	{		
-		$this->redis_keys();
+		$this->model->redis_keys();
 	}		
 	
 	// тк у нас supervisor  сервер запустится им после остановки
