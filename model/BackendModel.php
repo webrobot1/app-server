@@ -10,6 +10,23 @@ class BackendModel extends \Edisom\Core\Model
 		];
 	}	
 	   			
+	function redis_keys()
+	{
+		$it = NULL;
+		do {
+			// Scan for some keys
+			$arr_keys = static::redis()->scan($it);
+
+			// Redis may return empty results, so protect against that
+			if ($arr_keys !== FALSE) {
+				foreach($arr_keys as $str_key) {
+					echo "$str_key <br/>";
+				}
+			}
+		} while ($it > 0); 
+	}		
+	
+	
 	function stop(){
 		\Edisom\Core\Cli::cmd(\Edisom\Core\Cli::get('\\Edisom\\App\\server\\model\\ServerModel', 'command', 'stop'));	
 	}		

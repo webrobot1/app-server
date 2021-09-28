@@ -18,18 +18,7 @@ class BackendController extends \Edisom\Core\Backend
 	
 	function redis()
 	{		
-/* 		$it = NULL;
-		do {
-			// Scan for some keys
-			$arr_keys = $this->model::redis()->scan($it);
-
-			// Redis may return empty results, so protect against that
-			if ($arr_keys !== FALSE) {
-				foreach($arr_keys as $str_key) {
-					echo "$str_key <br/>";
-				}
-			}
-		} while ($it > 0); */
+		$this->redis_keys();
 	}		
 	
 	// тк у нас supervisor  сервер запустится им после остановки
