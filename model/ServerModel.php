@@ -16,6 +16,10 @@ class ServerModel extends \Edisom\Core\Model
 	}
 		
 	// нужно прийти к тому что бы ответ не ждать и рассылать в приложенях данные
+	// еще хорошим решением сделать на одном сервере отправку команды прямо в сокет Fastcgi (но тогда весь API делать надо в контроллере  не в моделе)
+	// это будет хорошим решением если у нас наши вендоры могут в процесае игры меняться но мы жервтуем скоростью небольшой (тк сейчас все вендоры уже загружены и процесс открыт)
+	// но есть и плюс - можно api это тестировать  (сделать на Swagger UI и тестить контроллеры)
+	// но именно в сокет, просто слать как get запрос это считаейте уже не websocket a http протокол будет игры
 	private function run(string $model, string $action, string $token, array $data = null)
 	{	
 		if($model = '\\Edisom\\App\\game\\model\\api\\'.ucfirst(strtolower($model))."Model")
@@ -32,8 +36,17 @@ class ServerModel extends \Edisom\Core\Model
 			} 
 			else 
 			{
-				$model::getInstance($token)->$action();
-				exit();
+				try
+				{
+					$model::getInstance($token)->$action();
+				}
+				catch(\Exception $ex)
+				{
+					static::redis()->publish('token:'.$token, json_encode(['error'=>$ex]));
+				}	
+				
+				// закрываем ветку
+				exit();						
 			}	
 		}
 	}
